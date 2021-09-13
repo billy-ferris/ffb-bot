@@ -468,7 +468,7 @@ if __name__ == '__main__':
         day_of_week='thu', hour=8, minute=30, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores',
-        day_of_week='mon', hour=20, minute=5, start_date=ff_start_date, end_date=ff_end_date,
+        day_of_week='mon', hour=20, minute=00, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_final'], id='final',
         day_of_week='tue', hour=8, minute=00, start_date=ff_start_date, end_date=ff_end_date,
