@@ -222,13 +222,18 @@ def get_close_scores(league, week=None):
     for i in matchups:
         if i.away_team:
             diffScore = i.away_score - i.home_score
+            projScore = get_projected_total(i.away_lineup) - get_projected_total(i.home_lineup)
             if ( -16 < diffScore <= 0 and not all_played(i.away_lineup)) or (0 <= diffScore < 16 and not all_played(i.home_lineup)):
                 score += ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
                         i.away_score, i.away_team.team_abbrev)]
+            elif ( -16 < projScore <= 0 and not all_played(i.away_lineup)) or (0 <= projScore < 16 and not all_played(i.home_lineup)):
+                score += ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
+                        i.away_score, i.away_team.team_abbrev)]
+                        
     if not score:
         return('')
-    text = ['Close Matchups:'] + score
-    return '\n\n'.join(text)
+    text = ['Close Matchups:\n'] + score
+    return '\n'.join(text)
 
 def get_power_rankings(league, week=None):
     # power rankings requires an integer value, so this grabs the current week for that
@@ -463,7 +468,7 @@ if __name__ == '__main__':
         day_of_week='thu', hour=8, minute=30, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores',
-        day_of_week='mon', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        day_of_week='mon', hour=20, minute=00, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_final'], id='final',
         day_of_week='tue', hour=8, minute=00, start_date=ff_start_date, end_date=ff_end_date,
