@@ -139,7 +139,7 @@ def get_projected_scoreboard(league, week=None):
     score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
                                     get_projected_total(i.away_lineup), i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
-    text = ['Projected Scores: '] + score
+    text = ['Projected Scores:'] + score
     return '\n'.join(text)
 
 def get_standings(league, top_half_scoring, week=None):
@@ -165,7 +165,7 @@ def get_standings(league, top_half_scoring, week=None):
             standings.append((wins, t.losses, t.team_name))
 
         standings = sorted(standings, key=lambda tup: tup[0], reverse=True)
-        standings_txt = [f"{pos + 1}: {team_name} ({wins} - {losses}) (+{top_half_totals[team_name]})" for \
+        standings_txt = [f"{pos + 1}. {team_name} ({wins} - {losses}) (+{top_half_totals[team_name]})" for \
             pos, (wins, losses, team_name) in enumerate(standings)]
     text = ["Current Standings:"] + standings_txt
 
@@ -215,7 +215,7 @@ def get_matchups(league, random_phrase, week=None):
     return '\n\n'.join(text)
 
 def get_close_scores(league, week=None):
-    #Gets current closest scores (15.999 points or closer)
+    #Gets current closest scores and projections (15.999 points or closer)
     matchups = league.box_scores(week=week)
     score = []
 
@@ -243,10 +243,17 @@ def get_power_rankings(league, week=None):
     #Using 2 step dominance, as well as a combination of points scored and margin of victory.
     #It's weighted 80/15/5 respectively
     power_rankings = league.power_rankings(week=week)
-
-    score = ['%s - %s' % (i[0], i[1].team_name) for i in power_rankings
-             if i]
-    text = ['Power Rankings:'] + score
+    list_item = []
+    for idx, value in enumerate(power_rankings, start=1):
+        team = value[1]
+        # TODO: Add streak, average score to response
+        # print(team.streak_length, team.streak_type)
+        rank = f'{idx}'
+        team_name = team.team_name
+        score = value[0]
+        list_item += [f'{rank}. {team_name} ({score})']
+             
+    text = ['Power Rankings:\n'] + list_item
     return '\n'.join(text)
 
 def get_trophies(league, week=None):
@@ -294,16 +301,17 @@ def get_trophies(league, week=None):
                 ownerer_team_name = i.away_team.team_name
                 blown_out_team_name = i.home_team.team_name
 
-    low_score_str = ['Lowest scorer: %s with %.2f points. ' % (low_team_name, low_score)] + get_random_insult()
+    low_score_str = ['Lowest scorer: %s with %.2f points. ' % (low_team_name, low_score), get_random_insult()]
     high_score_str = ['Highest scorer: %s with %.2f points.' % (high_team_name, high_score)]
     close_score_str = ['%s barely beat %s by a margin of %.2f.' % (close_winner, close_loser, closest_score)]
-    blowout_str = ['Awkwaaard! %s was blown out by %s by a margin of %.2f. ' % (blown_out_team_name, ownerer_team_name, biggest_blowout)] + get_random_insult()
+    blowout_str = ['Awkwaaard! %s was blown out by %s by a margin of %.2f. ' % (blown_out_team_name, ownerer_team_name, biggest_blowout), get_random_insult()]
 
     text = ['Awards of the week:'] + high_score_str + low_score_str + close_score_str + blowout_str
     return '\n\n'.join(text)
 
 def get_waivers_reminder():
-    return 'I am Funnybot! Don\'t forget to set your waiver claims for today before 11am EST you imperfect biological beings.'
+    text = ['I am Funnybot! Don\'t forget to set your waiver claims for today before 11am EST you imperfect biological beings.']
+    return text
 
 def bot_main(function):
     try:
