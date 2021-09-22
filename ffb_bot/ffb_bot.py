@@ -122,7 +122,7 @@ def get_random_insult():
         'You aren\'t the stupidest person on the planet. But you better hope to god they don\'t die.',
         'Your crippling inferiority complex is fully justified.',
     ]
-    return [random.choice(insults)]
+    return random.choice(insults)
 
 def get_scoreboard_short(league, week=None):
     #Gets current week's scoreboard
@@ -301,10 +301,10 @@ def get_trophies(league, week=None):
                 ownerer_team_name = i.away_team.team_name
                 blown_out_team_name = i.home_team.team_name
 
-    low_score_str = ['Lowest scorer: %s with %.2f points. ' % (low_team_name, low_score), get_random_insult()]
-    high_score_str = ['Highest scorer: %s with %.2f points.' % (high_team_name, high_score)]
+    low_score_str = ['%s was the lowest scorer on the week with %.2f points. ' % (low_team_name, low_score) + get_random_insult()]
+    high_score_str = ['%s was FAABulous this week! They were the highest scorer with %.2f points.' % (high_team_name, high_score)]
     close_score_str = ['%s barely beat %s by a margin of %.2f.' % (close_winner, close_loser, closest_score)]
-    blowout_str = ['Awkwaaard! %s was blown out by %s by a margin of %.2f. ' % (blown_out_team_name, ownerer_team_name, biggest_blowout), get_random_insult()]
+    blowout_str = ['Awkwaaard! %s was blown out by %s by a margin of %.2f. ' % (blown_out_team_name, ownerer_team_name, biggest_blowout) + get_random_insult()]
 
     text = ['Awards of the week:'] + high_score_str + low_score_str + close_score_str + blowout_str
     return '\n\n'.join(text)
@@ -466,9 +466,6 @@ if __name__ == '__main__':
     #score update:                       friday, monday, and tuesday morning at 8:00am EST.
     #score update:                       sunday at 4pm, 8pm EST.
 
-    sched.add_job(bot_main, 'cron', ['get_waivers_reminder'], id='waivers_reminder',
-        day_of_week='wed', hour=10, minute=00, start_date=ff_start_date, end_date=ff_end_date,
-        timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
         day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
@@ -481,9 +478,10 @@ if __name__ == '__main__':
     sched.add_job(bot_main, 'cron', ['get_final'], id='final',
         day_of_week='tue', hour=8, minute=00, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
-        day_of_week='wed', hour=8, minute=00, start_date=ff_start_date, end_date=ff_end_date,
-        timezone=my_timezone, replace_existing=True)
+    # TODO: redo standings logic - inaccurate; Pull right from espn api // move to tuesday morning
+    # sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
+    #     day_of_week='wed', hour=8, minute=00, start_date=ff_start_date, end_date=ff_end_date,
+    #     timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1',
         day_of_week='fri,mon', hour=8, minute=00, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
