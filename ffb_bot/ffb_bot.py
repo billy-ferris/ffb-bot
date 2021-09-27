@@ -201,6 +201,19 @@ def all_played(lineup):
             return False
     return True
 
+def players_left(lineup):
+    players = []
+    for i in lineup:
+        if i.slot_position != 'BE' and i.slot_position != 'IR' and i.game_played < 100:
+            players += [i.name]
+    if not players:
+        return('')
+    return players
+
+def format_player_name(name):
+    names = name.split()
+    return f"{''.join([f'{i[0]}.' for i in names[:-1]])} {names[-1]}"
+
 def get_matchups(league, random_phrase, week=None):
     #Gets current week's Matchups
     matchups = league.box_scores(week=week)
@@ -215,24 +228,36 @@ def get_matchups(league, random_phrase, week=None):
     return '\n\n'.join(text)
 
 def get_close_scores(league, week=None):
-    #Gets current closest scores and projections (15.999 points or closer)
+    #Gets current closest projections (16 points or closer)
     matchups = league.box_scores(week=week)
-    score = []
+    close_matchup_text = []
 
     for i in matchups:
         if i.away_team:
-            diffScore = i.away_score - i.home_score
-            projScore = get_projected_total(i.away_lineup) - get_projected_total(i.home_lineup)
-            if ( -16 < diffScore <= 0 and not all_played(i.away_lineup)) or (0 <= diffScore < 16 and not all_played(i.home_lineup)):
-                score += ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
-                        i.away_score, i.away_team.team_abbrev)]
-            elif ( -16 < projScore <= 0 and not all_played(i.away_lineup)) or (0 <= projScore < 16 and not all_played(i.home_lineup)):
-                score += ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
-                        i.away_score, i.away_team.team_abbrev)]
+            projection_diff = get_projected_total(i.away_lineup) - get_projected_total(i.home_lineup)
+            if ((-16 < projection_diff <= 0 and not (all_played(i.away_lineup) and all_played(i.home_lineup))) or (0 <= projection_diff < 16)):
+                matchup = ['%s vs %s' % (i.home_team.team_name, i.away_team.team_name)]
+                current_score = ['Current score: %s %.1f - %.1f %s' % (i.home_team.team_abbrev, i.home_score,
+                    i.away_score, i.away_team.team_abbrev)]
+                projected_score = ['Projected score: %s %.1f - %.1f %s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
+                    get_projected_total(i.away_lineup), i.away_team.team_abbrev)]
+
+                players = []
+                away_players = players_left(i.away_lineup)
+                for player in away_players:
+                    players += [f'{format_player_name(player)} ({i.away_team.team_abbrev})']
+                home_players = players_left(i.home_lineup)
+                for player in home_players:
+                    players += [f'{format_player_name(player)} ({i.home_team.team_abbrev})']
+                
+                players_left_text = ['‼Players to watch: ' + ', '.join(players) + '\n']
+
+                matchup_text = matchup + current_score + projected_score + players_left_text
+                close_matchup_text += matchup_text
                         
-    if not score:
+    if not close_matchup_text:
         return('')
-    text = ['Close Matchups:\n'] + score
+    text = ['⚠️Scoreboard Watch⚠️\n'] + close_matchup_text
     return '\n'.join(text)
 
 def get_power_rankings(league, week=None):
@@ -301,12 +326,12 @@ def get_trophies(league, week=None):
                 ownerer_team_name = i.away_team.team_name
                 blown_out_team_name = i.home_team.team_name
 
-    low_score_str = ['%s was the lowest scorer on the week with %.2f points. ' % (low_team_name, low_score) + get_random_insult()]
-    high_score_str = ['%s was FAABulous this week! They were the highest scorer with %.2f points.' % (high_team_name, high_score)]
+    low_score_str = ['%s was the lowest scoring team on the week with %.2f points. ' % (low_team_name, low_score) + get_random_insult() + '🤮']
+    high_score_str = ['✨✨%s was FAABulous this week! They were the highest scoring team with %.2f points.✨✨' % (high_team_name, high_score)]
     close_score_str = ['%s barely beat %s by a margin of %.2f.' % (close_winner, close_loser, closest_score)]
     blowout_str = ['Awkwaaard! %s was blown out by %s by a margin of %.2f. ' % (blown_out_team_name, ownerer_team_name, biggest_blowout) + get_random_insult()]
 
-    text = ['Awards of the week:'] + high_score_str + low_score_str + close_score_str + blowout_str
+    text = ['🏆This Week\'s Highlights🏆'] + high_score_str + low_score_str + close_score_str + blowout_str
     return '\n\n'.join(text)
 
 def get_waivers_reminder():
