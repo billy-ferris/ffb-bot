@@ -271,15 +271,32 @@ def get_power_rankings(league, week=None):
     list_item = []
     for idx, value in enumerate(power_rankings, start=1):
         team = value[1]
-        # TODO: Add streak, average score to response
-        # print(team.streak_length, team.streak_type)
         rank = f'{idx}'
         team_name = team.team_name
         score = value[0]
-        list_item += [f'{rank}. {team_name} ({score})']
-             
+        list_item += [f'{rank}. {team_name} ({score}) {get_heat_scale(team)}']
+
     text = ['Power Rankings:\n'] + list_item
     return '\n'.join(text)
+
+def get_heat_scale(team):
+    if team.streak_length > 1:
+        if team.streak_type == 'WIN':
+            return '🔥'
+        elif team.streak_type == 'LOSS':
+            return '❄️'
+    if team.streak_length >= 3:
+        if team.streak_type == 'WIN':
+            return '🔥🔥'
+        elif team.streak_type == 'LOSS':
+            return '❄️❄️'
+    if team.streak_length >= 5:
+        if team.streak_type == 'WIN':
+            return '🔥🔥🔥'
+        elif team.streak_type == 'LOSS':
+            return '❄️❄️❄️'
+    else:
+        return ''
 
 def get_trophies(league, week=None):
     #Gets trophies for highest score, lowest score, closest score, and biggest win
@@ -504,9 +521,6 @@ if __name__ == '__main__':
         day_of_week='tue', hour=8, minute=00, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
     # TODO: redo standings logic - inaccurate; Pull right from espn api // move to tuesday morning
-    # sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
-    #     day_of_week='wed', hour=8, minute=00, start_date=ff_start_date, end_date=ff_end_date,
-    #     timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1',
         day_of_week='fri,mon', hour=8, minute=00, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
