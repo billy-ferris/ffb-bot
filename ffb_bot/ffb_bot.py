@@ -280,17 +280,19 @@ def get_power_rankings(league, week=None):
     return '\n'.join(text)
 
 def get_heat_scale(team):
-    if team.streak_length > 1:
+    print(team, team.streak_length)
+    if 1 < team.streak_length < 3:
         if team.streak_type == 'WIN':
             return '🔥'
         elif team.streak_type == 'LOSS':
             return '❄️'
-    if team.streak_length >= 3:
+    if 3 <= team.streak_length < 5:
+        print('here')
         if team.streak_type == 'WIN':
             return '🔥🔥'
         elif team.streak_type == 'LOSS':
             return '❄️❄️'
-    if team.streak_length >= 5:
+    if 5 <= team.streak_length:
         if team.streak_type == 'WIN':
             return '🔥🔥🔥'
         elif team.streak_type == 'LOSS':
@@ -509,7 +511,7 @@ if __name__ == '__main__':
     #score update:                       sunday at 4pm, 8pm EST.
 
     sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
-        day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        day_of_week='tue', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups',
         day_of_week='thu', hour=8, minute=30, start_date=ff_start_date, end_date=ff_end_date,
@@ -521,6 +523,9 @@ if __name__ == '__main__':
         day_of_week='tue', hour=8, minute=00, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
     # TODO: redo standings logic - inaccurate; Pull right from espn api // move to tuesday morning
+    # sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
+    #     day_of_week='wed', hour=8, minute=00, start_date=ff_start_date, end_date=ff_end_date,
+    #     timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1',
         day_of_week='fri,mon', hour=8, minute=00, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
